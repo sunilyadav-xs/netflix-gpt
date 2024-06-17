@@ -2,9 +2,13 @@ import { useRef, useState } from "react";
 import Header from "./Header";
 import { checkCredentials } from "../utils/validation";
 import { auth } from "../utils/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import {useNavigate} from "react-router-dom";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { useDispatch } from "react-redux";
+import { BACKGROUND_IMAGE} from "../utils/constants";
 
 const Login = () => {
   const [isSignInForm, setIsSignInForm] = useState(true);
@@ -12,7 +16,6 @@ const Login = () => {
   const name = useRef(null);
   const email = useRef(null);
   const password = useRef(null);
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleButtonClick = () => {
@@ -36,14 +39,23 @@ const Login = () => {
           // Signed up
           const user = userCredential.user;
           updateProfile(user, {
-            displayName: name.current?.value, photoURL: "https://avatars.githubusercontent.com/u/150514890?v=4"
-          }).then(() => {
-            const {uid, email, displayName, photoURL} = auth.currentUser;
-            dispatch(addUser({uid: uid, email: email, displayName: displayName, photoURL: photoURL}));
-            navigate("/browse");
-          }).catch((error) => {
-            setErrorMessage(error.message);
-          });
+            displayName: name.current?.value,
+            photoURL: photoURL,
+          })
+            .then(() => {
+              const { uid, email, displayName, photoURL } = auth.currentUser;
+              dispatch(
+                addUser({
+                  uid: uid,
+                  email: email,
+                  displayName: displayName,
+                  photoURL: photoURL,
+                })
+              );
+            })
+            .catch((error) => {
+              setErrorMessage(error.message);
+            });
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -51,12 +63,14 @@ const Login = () => {
           setErrorMessage(errorCode + " : " + errorMessage);
         });
     } else {
-      signInWithEmailAndPassword(auth, email.current?.value,
-        password.current?.value)
+      signInWithEmailAndPassword(
+        auth,
+        email.current?.value,
+        password.current?.value
+      )
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
-          navigate("/browse");
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -69,13 +83,10 @@ const Login = () => {
     setIsSignInForm(!isSignInForm);
   };
   return (
-    <div>
+    <div className="overflow-hidden">
       <Header />
       <div className="absolute">
-        <img
-          src="https://assets.nflxext.com/ffe/siteui/vlv3/cacfadb7-c017-4318-85e4-7f46da1cae88/e43aa8b1-ea06-46a5-abe3-df13243e718d/IN-en-20240603-popsignuptwoweeks-perspective_alpha_website_large.jpg"
-          alt="background image"
-        />
+        <img src={BACKGROUND_IMAGE} alt="background image" />
       </div>
       <form
         className="absolute w-3/12 p-12 bg-black bg-opacity-85 my-40 mx-auto right-0 left-0 text-white rounded-lg"
@@ -113,7 +124,7 @@ const Login = () => {
         >
           {isSignInForm ? "Sign In" : "Sign Up"}
         </button>
-        <p className="py-6" onClick={toggleForm}>
+        <p className="py-6 cursor-pointer" onClick={toggleForm}>
           {isSignInForm
             ? "New to Netflix? Sign up now."
             : "Already registered? Sign In Now."}
